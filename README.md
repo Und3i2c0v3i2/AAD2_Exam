@@ -1,5 +1,9 @@
 # AAD2_Exam
 
+
+Uncomment dbHelper.insertSomeDummyData() in App.java to get some initial data
+
+
 ![Screenshot](aad2_8.png) ![Screenshot](aad2_7.png)
 
 ![Screenshot](aad2_6.png) ![Screenshot](aad2_4.png)
