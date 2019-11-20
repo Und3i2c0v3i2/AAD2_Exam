@@ -1,4 +1,4 @@
-package com.example.aad2.utils;
+package com.example.aad2.util;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -7,10 +7,10 @@ import androidx.appcompat.app.AlertDialog;
 
 import com.example.aad2.R;
 
+
 public class AlertDialogUtil {
 
-
-    /* for for deciding if we should show dialog when rotation change */
+    /* for deciding if we should show dialog on rotation change */
     public static boolean isAboutShowing;
 
     public static AlertDialog showDialog(Context context) {
@@ -18,9 +18,9 @@ public class AlertDialogUtil {
         isAboutShowing = true;
         AlertDialog.Builder builder =
                 new AlertDialog.Builder(context)
-                        .setMessage("Example from AAD2 exam:\nThis application was made for practice purpose only.\nIvana")
+                        .setMessage("Exam AAD2:\nThis application was made for FTN Informatika final Exam.\nIvana Kilibarda")
                         .setTitle("About")
-                        .setIcon(R.drawable.ic_info_outline_black_24dp)
+                        .setIcon(R.drawable.ic_about)
                         .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {

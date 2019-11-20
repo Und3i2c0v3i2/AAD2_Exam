@@ -2,73 +2,45 @@ package com.example.aad2.view.activities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
+import androidx.databinding.DataBindingUtil;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
 import com.example.aad2.R;
-import com.example.aad2.model.entity.Contact;
-import com.example.aad2.presenter.abstr.AddContract;
-import com.example.aad2.presenter.abstr.BasePresenter;
-import com.example.aad2.presenter.impl.AddPresenter;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.textfield.TextInputLayout;
+import com.example.aad2.databinding.ActivityAddBinding;
+import com.example.aad2.entity.Contact;
+import com.example.aad2.prefs.PrefsActivity;
 
 import java.util.Objects;
 
-import static com.example.aad2.utils.AlertDialogUtil.isAboutShowing;
 
 public class AddActivity
         extends BaseActivity
-        implements AddContract.View {
+        implements View.OnClickListener {
 
 
-    private TextInputLayout firstName;
-    private TextInputLayout lastName;
-    private TextInputLayout address;
-    private TextInputLayout imgUrl;
-
-    private Toolbar toolbar;
-
-    private MaterialButton btnSave;
-    private MaterialButton btnCancel;
-
-    private AddContract.Presenter presenter;
-
+    private ActivityAddBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add);
 
-        presenter = new AddPresenter(this);
 
-        findViews();
-        setupBtns();
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_add);
+        binding.setClickHandler(this);
+
         setupToolbar();
-
     }
 
 
-    private void findViews() {
-        firstName = findViewById(R.id.first_name);
-        lastName = findViewById(R.id.last_name);
-        address = findViewById(R.id.address);
-        imgUrl = findViewById(R.id.img_url);
-        btnSave = findViewById(R.id.btn_save);
-        btnCancel = findViewById(R.id.btn_cancel);
-    }
-
-    private void setupBtns() {
-        btnSave.setOnClickListener(actionListener);
-        btnCancel.setOnClickListener(actionListener);
-    }
-
+    /* ************* TOOLBAR & MENU ************** */
 
     private void setupToolbar() {
-        toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) binding.toolbar;
         setSupportActionBar(toolbar);
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
     }
@@ -83,94 +55,78 @@ public class AddActivity
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
 
         switch (item.getItemId()) {
+
             case R.id.menu_settings:
-                presenter.actionSettings();
+                startActivity(new Intent(this, PrefsActivity.class));
                 return true;
+
             case R.id.menu_about:
-                presenter.actionAbout(this);
+                showAboutDialog(this);
                 return true;
 
             case android.R.id.home:
-                navigateBack();
+                onBackPressed();
+                finish();
                 return true;
 
+
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        return true;
+
     }
 
-    private View.OnClickListener actionListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            switch (v.getId()) {
-                case R.id.btn_cancel:
-                    presenter.actionCancel();
-                    break;
-                case R.id.btn_save:
-                    save();
-                    break;
-            }
-        }
-    };
+    @Override
+    public void onClick(View v) {
 
-    private void save() {
+        switch (v.getId()) {
+
+            case R.id.btn_save:
+                Contact contact = createNew();
+                int i = dbRepository.insert(contact);
+                if(i != -1) {
+                    checkPrefs(this, "Added: ", contact.getFirstName() + " " + contact.getLastName());
+                }
+                onBackPressed();
+                finish();
+                break;
+
+            case R.id.btn_cancel:
+                onBackPressed();
+                break;
+
+        }
+
+    }
+
+    private Contact createNew() {
         Contact contact = new Contact();
-        contact.setFirstName(Objects.requireNonNull(firstName.getEditText()).getText().toString());
-        contact.setLastName(Objects.requireNonNull(lastName.getEditText()).getText().toString());
-        contact.setAddress(Objects.requireNonNull(address.getEditText()).getText().toString());
-        contact.setImgUrl(Objects.requireNonNull(imgUrl.getEditText()).getText().toString());
+        contact.setFirstName(binding.inputFirstName.getEditText().getText().toString());
+        contact.setLastName(binding.inputLastName.getEditText().getText().toString());
+        contact.setAddress(binding.inputAddress.getEditText().getText().toString());
+        contact.setImgUrl(binding.inputImgUrl.getEditText().getText().toString());
 
-        presenter.actionAdd(contact);
-    }
-
-
-    @Override
-    public void navigateBack() {
-        onBackPressed();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        presenter.start();
-
-        if(isAboutShowing) {
-            showAboutDialog(this);
-        }
-    }
-
-
-    @Override
-    public void setPresenter(BasePresenter presenter) {
-        this.presenter = (AddContract.Presenter) presenter;
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        presenter.onDestroy();
-
-        // dismiss about dialog if it is open so activity doesn't leak
-        if(alertDialog != null && alertDialog.isShowing())
-            alertDialog.dismiss();
+        return contact;
     }
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putString(FIRST_NAME, (Objects.requireNonNull(firstName.getEditText())).getText().toString());
-        outState.putString(LAST_NAME, (Objects.requireNonNull(lastName.getEditText())).getText().toString());
-        outState.putString(ADDRESS, (Objects.requireNonNull(address.getEditText())).getText().toString());
-        outState.putString(IMG_URL, (Objects.requireNonNull(imgUrl.getEditText())).getText().toString());
+        outState.putString(FIRST_NAME, binding.inputFirstName.getEditText().getText().toString());
+        outState.putString(LAST_NAME, binding.inputLastName.getEditText().getText().toString());
+        outState.putString(ADDRESS, binding.inputAddress.getEditText().getText().toString());
+        outState.putString(IMG_URL, binding.inputImgUrl.getEditText().getText().toString());
     }
 
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
 
-        Objects.requireNonNull(firstName.getEditText()).setText(savedInstanceState.getString(FIRST_NAME));
-        Objects.requireNonNull(lastName.getEditText()).setText(savedInstanceState.getString(LAST_NAME));
-        Objects.requireNonNull(address.getEditText()).setText(savedInstanceState.getString(ADDRESS));
-        Objects.requireNonNull(imgUrl.getEditText()).setText(savedInstanceState.getString(IMG_URL));
+        binding.inputFirstName.getEditText().setText(savedInstanceState.getString(FIRST_NAME));
+        binding.inputLastName.getEditText().setText(savedInstanceState.getString(LAST_NAME));
+        binding.inputAddress.getEditText().setText(savedInstanceState.getString(ADDRESS));
+        binding.inputImgUrl.getEditText().setText(savedInstanceState.getString(IMG_URL));
+
     }
 }

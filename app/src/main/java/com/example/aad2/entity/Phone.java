@@ -1,4 +1,4 @@
-package com.example.aad2.model.entity;
+package com.example.aad2.entity;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -8,39 +8,33 @@ import androidx.annotation.StringDef;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
+import static com.example.aad2.db.DBHelper.COLUMN_FOREIGN_ID;
+
 
 @DatabaseTable(tableName = Phone.TABLE_NAME_PHONE)
 public class Phone implements Parcelable {
 
-    @StringDef({
-            Type.MOBILE,
-            Type.HOME,
-            Type.WORK})
-
-    public @interface Type {
-        String MOBILE = "Mobile";
-        String HOME = "Home";
-        String WORK = "Work";
-    }
+//    @StringDef({
+//            Type.MOBILE,
+//            Type.HOME,
+//            Type.WORK})
+//
+//    public @interface Type {
+//        String MOBILE = "Mobile";
+//        String HOME = "Home";
+//        String WORK = "Work";
+//    }
 
     public static final String TABLE_NAME_PHONE = "phone_table";
-    public static final String COLUMN_ID = "id";
-    public static final String COLUMN_NUMBER = "number";
-    public static final String COLUMN_NUMBER_TYPE = "number_type";
-    public static final String COLUMN_CONTACT_ID = "contact_id";
 
 
-    @DatabaseField(columnName = COLUMN_ID, generatedId = true)
+    @DatabaseField(generatedId = true)
     private int id;
-    @DatabaseField(columnName = Phone.COLUMN_NUMBER)
+    @DatabaseField
     private String number;
-    @DatabaseField(columnName = Phone.COLUMN_NUMBER_TYPE)
+    @DatabaseField
     private String type;
-    @DatabaseField(columnName = Phone.COLUMN_CONTACT_ID,
-            foreign = true, canBeNull = false,
-//            foreignAutoCreate = true,
-            columnDefinition = "CONSTRAINT phonebook_id REFERENCES phonebook_table(id) on delete cascade")
-    // TODO cant delete child when deleting parent
+    @DatabaseField(foreign = true, columnName = COLUMN_FOREIGN_ID)
     private Contact contact;
 
     protected Phone(Parcel in) {

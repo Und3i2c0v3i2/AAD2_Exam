@@ -1,42 +1,38 @@
 package com.example.aad2;
 
 import android.app.Application;
-import android.content.Context;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.os.Build;
 
-import androidx.preference.PreferenceManager;
 
-import com.example.aad2.model.db.DBHelper;
-import com.example.aad2.model.db.DBRepository;
-import com.example.aad2.model.db.DBRepositoryImpl;
-import com.example.aad2.model.prefs.PrefsRepository;
-import com.example.aad2.model.prefs.PrefsRepositoryImpl;
-import com.example.aad2.utils.NotificationsUtil;
+import com.example.aad2.db.DBHelper;
+import com.example.aad2.db.DBRepository;
+import com.example.aad2.db.DBRepositoryImpl;
+import com.example.aad2.prefs.PrefsRepository;
+import com.example.aad2.prefs.PrefsRepositoryImpl;
 
 public class App extends Application {
 
 
-    public static final String CHANNEL_1_ID = "channel_1";
+    public static final String CHANNEL_ID = "channel";
     public static final String CHANNEL_NAME = "Notification Channel";
     public static final String CHANNEL_DESC = "Notification Channel Description";
 
-    protected AppsNotificationManager notificationManager;
-    private static DBHelper dbHelper;
+    // for intents
+    public static final String OBJECT_ID = "id";
+
     private static DBRepository dbRepository;
     private static PrefsRepository prefsRepository;
 
-    /*
-    this onCreate will be started before any activity starts
-    and here we can register our channels
-     */
+
     @Override
     public void onCreate() {
         super.onCreate();
-        notificationManager = AppsNotificationManager.getInstance(this);
-        notificationManager.registerNotificationChannel(CHANNEL_1_ID, CHANNEL_NAME, CHANNEL_DESC);
-
-        dbHelper = DBHelper.getInstance(this);
+        DBHelper dbHelper = DBHelper.getInstance(this);
         dbRepository = new DBRepositoryImpl(dbHelper);
-        prefsRepository = new PrefsRepositoryImpl(PreferenceManager.getDefaultSharedPreferences(this));
+        registerNotificationChannel(CHANNEL_ID, CHANNEL_NAME, CHANNEL_DESC);
+        prefsRepository = new PrefsRepositoryImpl(this);
 
 //        dbHelper.insertSomeDummyData();
     }
@@ -46,9 +42,23 @@ public class App extends Application {
         return dbRepository;
     }
 
-    public static PrefsRepository getSharedPrefsRepository() {
+    public static PrefsRepository getPrefsRepository() {
         return prefsRepository;
     }
 
+    public void registerNotificationChannel(String channelId, String channelName, String channelDescription) {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+            NotificationChannel channel =
+                    new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT);
+            channel.setDescription(channelDescription);
+
+            NotificationManager manager = this.getSystemService(NotificationManager.class);
+            if (manager != null) {
+                manager.createNotificationChannel(channel);
+            }
+        }
+    }
 
 }

@@ -3,23 +3,15 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <PreferenceCategory android:title="@string/settings_header"
-        >
-
-        <SwitchPreferenceCompat
-            app:key="@string/receive_info_key"
-            app:title="@string/receive_info_title"
-            android:summaryOn="@string/receive_info_summ_on"
-            android:summaryOff="@string/receive_info_summ_off"/>
-
+    <PreferenceCategory android:title="@string/prefs_header">
 
         <ListPreference
-            android:summary="Toast"
-            app:dependency="@string/receive_info_key"
+            android:summary="Toast Messages"
             app:entries="@array/pref_info_entries"
             app:entryValues="@array/pref_info_values"
             app:key="@string/info_type_key"
-            app:title="@string/info_type_title" />
+            app:title="@string/info_type_title"
+            android:defaultValue="Toast Messages"/>
 
 
     </PreferenceCategory>

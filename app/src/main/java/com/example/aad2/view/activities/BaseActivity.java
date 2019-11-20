@@ -1,77 +1,86 @@
 package com.example.aad2.view.activities;
 
-import android.app.Notification;
-import android.app.NotificationManager;
 import android.content.Context;
-import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 
-import androidx.annotation.RequiresApi;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.NotificationManagerCompat;
 
 
 import com.example.aad2.App;
-import com.example.aad2.R;
-import com.example.aad2.model.entity.Contact;
-import com.example.aad2.utils.AlertDialogUtil;
-import com.example.aad2.utils.NotificationsUtil;
-import com.example.aad2.utils.ToastUtil;
-import com.example.aad2.view.BaseView;
+import com.example.aad2.db.DBRepository;
+import com.example.aad2.prefs.PrefsRepository;
+import com.example.aad2.util.AlertDialogUtil;
+import com.example.aad2.util.NotificationsUtil;
+import com.example.aad2.util.ToastUtil;
 
-import java.util.ArrayList;
-import java.util.List;
-
-
-public abstract class BaseActivity
-        extends AppCompatActivity
-        implements BaseView {
+import static com.example.aad2.prefs.PrefsRepository.NOTIF;
+import static com.example.aad2.prefs.PrefsRepository.TOAST;
+import static com.example.aad2.util.AlertDialogUtil.isAboutShowing;
 
 
-    protected static final String FIRST_NAME = "first_name";
-    protected static final String LAST_NAME = "last_name";
-    protected static final String ADDRESS = "address";
-    protected static final String IMG_URL = "img_url";
+public abstract class BaseActivity extends AppCompatActivity {
 
 
-    /*
-    save alert dialog as a member variable so we can dismiss it before activity is destroyed,
-    or it can cause leak
-     */
+    public static final String FIRST_NAME = "first_name";
+    public static final String LAST_NAME = "last_name";
+    public static final String ADDRESS = "address";
+    public static final String IMG_URL = "img_url";
+
+
+    protected DBRepository dbRepository;
+    protected PrefsRepository prefsRepository;
+
     protected AlertDialog alertDialog;
 
-
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-    }
-
-    @Override
-    public void navigateToSettings() {
-        startActivity(new Intent(this, SettingsActivity.class));
+        dbRepository = App.getDbRepository();
+        prefsRepository = App.getPrefsRepository();
     }
 
 
-    @Override
+    /* ********** CHECK WHETHER TO SHOW NOTIFICATIONS/TOASTS ************* */
+    public void checkPrefs(Context context, String title, String text) {
+        String s = prefsRepository.enabled(PrefsRepository.INFO_TYPE);
+        if (s.equals(TOAST)) {
+            ToastUtil.showToast(context, title + ": " + text);
+        }else if (s.equals(NOTIF)) {
+            NotificationsUtil.getNotification(context, ListActivity.class, title, text);
+        }
+    }
+
+
+    /* ******************* ALERT DIALOG *************** */
+
     public void showAboutDialog(Context context) {
-        alertDialog = AlertDialogUtil.showDialog(this);
+        alertDialog = AlertDialogUtil.showDialog(context);
         alertDialog.show();
     }
 
+
     @Override
-    public void showToast(String msg) {
-        ToastUtil.getToast(this, msg).show();
+    protected void onResume() {
+        super.onResume();
+
+        if(isAboutShowing) {
+            showAboutDialog(this);
+        }
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
-    public void showNotif(String title, String msg) {
-        Notification notification = NotificationsUtil.getSimpleNotification(this, ListActivity.class, App.CHANNEL_1_ID, title, msg, R.drawable.ic_notifi_1, R.drawable.ic_notifi_1, NotificationManager.IMPORTANCE_DEFAULT, true, 1, 0);
-        NotificationManagerCompat.from(this).notify(1, notification);
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // dismiss alert dialog if it is open so activity doesn't leak
+        if(alertDialog != null && alertDialog.isShowing())
+            alertDialog.dismiss();
     }
+
+
 
 }
 

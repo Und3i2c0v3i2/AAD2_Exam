@@ -1,4 +1,4 @@
-package com.example.aad2.model.entity;
+package com.example.aad2.entity;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -9,31 +9,27 @@ import com.j256.ormlite.table.DatabaseTable;
 
 import java.util.Collection;
 
+import static com.example.aad2.db.DBHelper.COLUMN_FOREIGN_ID;
+
 
 @DatabaseTable(tableName = Contact.TABLE_NAME_CONTACT)
 public class Contact implements Parcelable {
 
     public static final String TABLE_NAME_CONTACT = "contact_table";
-    public static final String COLUMN_ID = "id";
-    public static final String COLUMN_IMG_URL = "img_url";
-    public static final String COLUMN_FIRST_NAME = "first_name";
-    public static final String COLUMN_LAST_NAME = "last_name";
-    public static final String COLUMN_ADDRESS = "address";
-    public static final String COLUMN_CONTACT = "contact";
 
 
-    @DatabaseField(columnName = COLUMN_ID, generatedId = true)
+    @DatabaseField(generatedId = true)
     private int id;
-    @DatabaseField(columnName = COLUMN_IMG_URL)
+    @DatabaseField
     private String imgUrl;
-    @DatabaseField(columnName = Contact.COLUMN_FIRST_NAME)
+    @DatabaseField
     private String firstName;
-    @DatabaseField(columnName = Contact.COLUMN_LAST_NAME)
+    @DatabaseField
     private String lastName;
-    @DatabaseField(columnName = Contact.COLUMN_ADDRESS)
+    @DatabaseField
     private String address;
 
-    @ForeignCollectionField(foreignFieldName = Contact.COLUMN_CONTACT, eager = true)
+//    @ForeignCollectionField(foreignFieldName = COLUMN_FOREIGN_ID, eager = true)
     private Collection<Phone> phones;
 
     protected Contact(Parcel in) {

@@ -7,17 +7,9 @@
     <string name="title_activity_settings">Settings</string>
 
 
-    <!-- Settings Headers -->
-    <string name="settings_header">Be Informed</string>
-
-    <string name="receive_info_key">receive_info</string>
-    <string name="receive_info_title">Receive Informations</string>
-    <string name="receive_info_summ_off">Don\'t inform me</string>
-    <string name="receive_info_summ_on">Send me informations</string>
-
-    <!-- Toast Preferences -->
     <string name="info_type_key">info_type</string>
-    <string name="info_type_title">Choose how you want to be informed</string>
+    <string name="info_type_title">Receive Informations</string>
+    <string name="prefs_header">Info</string>
 
     <string-array name="pref_info_entries">
         <item>Allow Toast Messages</item>
@@ -29,7 +21,7 @@
         <item>Notifications</item>
     </string-array>
 
-    <string-array name="phones">
+    <string-array name="phone_types">
         <item>Home</item>
         <item>Work</item>
         <item>Mobile</item>

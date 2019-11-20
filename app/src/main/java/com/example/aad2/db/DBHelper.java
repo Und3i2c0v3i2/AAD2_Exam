@@ -1,13 +1,16 @@
-package com.example.aad2.model.db;
+package com.example.aad2.db;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.example.aad2.model.entity.Contact;
-import com.example.aad2.model.entity.Phone;
+import com.example.aad2.entity.Contact;
+import com.example.aad2.entity.Phone;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.stmt.DeleteBuilder;
+import com.j256.ormlite.stmt.PreparedQuery;
+import com.j256.ormlite.stmt.QueryBuilder;
+import com.j256.ormlite.stmt.Where;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 
@@ -15,13 +18,14 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.aad2.model.entity.Phone.COLUMN_CONTACT_ID;
 
 public class DBHelper extends OrmLiteSqliteOpenHelper {
 
 
     private static final String DATABASE_NAME = "ormlite.db";
     private static final int DATABASE_VERSION = 1;
+
+    public static final String COLUMN_FOREIGN_ID = "foreign_id";
 
     private Dao<Contact, Integer> contactDao;
     private Dao<Phone, Integer> phoneDao;
@@ -88,6 +92,7 @@ public class DBHelper extends OrmLiteSqliteOpenHelper {
         return phoneDao;
     }
 
+
     @Override
     public void close() {
         contactDao = null;
@@ -95,63 +100,76 @@ public class DBHelper extends OrmLiteSqliteOpenHelper {
         super.close();
     }
 
+
     public int insert(Contact contact) {
+        // return value (number of rows modified) can be used for toast or something like that
+        int i = -1;
+        if (contact != null) {
 
-        try {
-            return contactDao.create(contact);
-        } catch (SQLException e) {
-            e.printStackTrace();
+            if (checkIfExists(contact) == null) {
+
+                try {
+                    i = contactDao.create(contact);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
-        return -1;
+        return i;
     }
-
-    public int delete(Contact contact) {
-
-        // delete phones also
-        deleteByContact(contact.getId());
-        try {
-            return contactDao.delete(contact);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return -1;
-    }
-
 
     public int modify(Contact contact) {
 
+        int i = -1;
+        if (contact != null) {
+
+            try {
+                i = contactDao.update(contact);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        return i;
+    }
+
+    // If custom Id (ex. JSON)
+    // to check if element is already in DB before inserting if we have some JSON id/unique field
+    private Contact checkIfExists(Contact contact) {
+
+        Contact exist = null;
+
         try {
-            return contactDao.update(contact);
+            QueryBuilder<Contact, Integer> qb = contactDao.queryBuilder();
+            Where<Contact, Integer> where = qb.where();
+            where.eq("firstName", contact.getFirstName())
+                    .and()
+                    .eq("lastName", contact.getLastName())
+                    .and()
+                    .eq("address", contact.getAddress());
+            PreparedQuery<Contact> pq = qb.prepare();
+            exist = contactDao.queryForFirst(pq);
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return -1;
+        return exist;
     }
 
+    // If generated Id
     public Contact getById(int id) {
 
+        Contact contact = null;
         try {
-            return contactDao.queryForId(id);
+            contact = contactDao.queryForId(id);
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return null;
-    }
 
-
-    public int insert(Phone phone) {
-
-        try {
-            return phoneDao.create(phone);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
-        return -1;
+        return contact;
     }
 
 
@@ -168,29 +186,67 @@ public class DBHelper extends OrmLiteSqliteOpenHelper {
     }
 
 
-    public List<Phone> getByContact(int id) {
+    // If generated Id
+    public int delete(Contact contact) {
+
+        int i = -1;
 
         try {
-            return phoneDao.queryForEq(COLUMN_CONTACT_ID, id);
+            i = contactDao.delete(contact);
+            deleteForeignCollection(contact.getId());
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return new ArrayList<>();
+        return i;
     }
 
-    public void deleteByContact(int id) {
+
+    public int insert(Phone phone) {
+        // return value (number of rows modified) can be used for toast or something like that
+        int i = -1;
+        if (phone != null) {
+            try {
+                i = phoneDao.create(phone);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return i;
+    }
+
+
+    public List<Phone> getForeignCollection(int id) {
+
+        List<Phone> list = new ArrayList<>();
+
+        try {
+            list = phoneDao.queryForEq(COLUMN_FOREIGN_ID, id);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+
+    public void deleteForeignCollection(int id) {
 
         try {
             DeleteBuilder builder = phoneDao.deleteBuilder();
             builder.where()
-                    .eq(COLUMN_CONTACT_ID, id);
+                    .eq(COLUMN_FOREIGN_ID, id);
             builder.delete();
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
+
     }
+
+
+
 
     public void insertSomeDummyData() {
 
@@ -232,4 +288,6 @@ public class DBHelper extends OrmLiteSqliteOpenHelper {
         }
 
     }
+
+
 }
