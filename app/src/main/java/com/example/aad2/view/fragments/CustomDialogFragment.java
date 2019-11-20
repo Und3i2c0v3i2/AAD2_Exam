@@ -29,18 +29,10 @@ import static com.example.aad2.view.OnActionPerformedListener.OBJECT_PARCELABLE;
 
 public class CustomDialogFragment extends AppCompatDialogFragment {
 
-//    private TextInputLayout phoneNo;
-//    private AppCompatSpinner spinner;
-//    private ArrayAdapter adapter;
     private OnActionPerformedListener listener;
     private DialogLayoutBinding binding;
-//    private String choice;
     private Phone phone;
     private Contact contact;
-
-    /* member variable so we can show dialog on rotation if it has been showing */
-    public static boolean isShowing;
-
 
     @NonNull
     @Override
@@ -49,7 +41,6 @@ public class CustomDialogFragment extends AppCompatDialogFragment {
         binding = DataBindingUtil
                 .inflate(getActivity().getLayoutInflater(), R.layout.dialog_layout, null, false);
 
-//        binding.setClickHandler(this);
         phone = new Phone();
         binding.spinnerPhone.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -62,39 +53,6 @@ public class CustomDialogFragment extends AppCompatDialogFragment {
 
             }
         });
-
-
-//        Dialog dialog = new Dialog(context);
-//        dialog.setContentView(binding.getRoot());
-//        dialog.show();
-//
-//
-//        LayoutInflater inflater = Objects.requireNonNull(getActivity()).getLayoutInflater();
-//        View view = inflater.inflate(R.layout.dialog_layout, null);
-
-//        phoneNo = view.findViewById(R.id.add_phone);
-//        spinner = view.findViewById(R.id.spinner_phone);
-//
-//        adapter = ArrayAdapter.createFromResource(getActivity(), R.array.phone_types, android.R.layout.simple_spinner_item);
-//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-//        spinner.setAdapter(adapter);
-
-
-//        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//            @Override
-//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//                choice = parent.getItemAtPosition(position).toString();
-//                phone.setType(choice);
-//            }
-//
-//            @Override
-//            public void onNothingSelected(AdapterView<?> parent) {
-//
-//            }
-//        });
-//
-//        if(savedInstanceState != null)
-//            phoneNo.getEditText().setText(savedInstanceState.getString("number"));
 
         return getDialog(binding.getRoot());
     }
